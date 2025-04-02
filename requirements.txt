@@ -3,3 +3,4 @@ pandas
 requests
 flask
 gunicorn
+google-generativeai
