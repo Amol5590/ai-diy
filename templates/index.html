@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DIY Home Improvement Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .chat-container {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .user-message {
+            background-color: #e6f7ff;
+            padding: 8px;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        .bot-message {
+            background-color: #f0f0f0;
+            padding: 8px;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        #user-input {
+            width: 80%;
+            padding: 8px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>DIY Home Improvement Guide</h1>
+    <div class="chat-container" id="chat-container">
+        <div class="bot-message">Hello! I'm your DIY Home Improvement assistant. Ask me about painting, plumbing, flooring, or electrical projects!</div>
+    </div>
+    <div>
+        <input type="text" id="user-input" placeholder="Ask about a DIY project...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const chatContainer = document.getElementById('chat-container');
+            const message = userInput.value.trim();
+            
+            if (message === '') return;
+            
+            // Add user message to chat
+            const userDiv = document.createElement('div');
+            userDiv.className = 'user-message';
+            userDiv.textContent = message;
+            chatContainer.appendChild(userDiv);
+            
+            // Clear input
+            userInput.value = '';
+            
+            // Add loading message
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'bot-message';
+            loadingDiv.textContent = 'Thinking...';
+            loadingDiv.id = 'loading-message';
+            chatContainer.appendChild(loadingDiv);
+            
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Get bot response
+            fetch('/get_response', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove loading message
+                const loadingMessage = document.getElementById('loading-message');
+                if (loadingMessage) {
+                    loadingMessage.remove();
+                }
+                
+                // Add bot response to chat
+                const botDiv = document.createElement('div');
+                botDiv.className = 'bot-message';
+                botDiv.textContent = data.response;
+                chatContainer.appendChild(botDiv);
+                
+                // Scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            })
+            .catch(error => {
+                // Remove loading message
+                const loadingMessage = document.getElementById('loading-message');
+                if (loadingMessage) {
+                    loadingMessage.remove();
+                }
+                
+                // Add error message
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'bot-message';
+                errorDiv.textContent = 'Sorry, there was an error processing your request.';
+                chatContainer.appendChild(errorDiv);
+                
+                // Scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                
+                console.error('Error:', error);
+            });
+        }
+        
+        // Allow Enter key to send message
+        document.getElementById('user-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
+        
